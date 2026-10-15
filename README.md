@@ -71,6 +71,10 @@ The data directories can be located anywhere on the host and must be configured 
 
 ### Downloading and post-processing oceanic forcing
 
+`copernicusmarine login --log-level DEBUG --configuration-file-directory /env_root/`
+
+`download_ocean_forcing.sh`
+
 ### Downloading and postprocessing atmospheric forcing
 
 ### Downloading satellite observations
@@ -86,3 +90,7 @@ The data directories can be located anywhere on the host and must be configured 
 ### run_forecast.sh
 
 ### Output data directory structure
+
+
+## TODO / Problems
+* $NEXTSIM_ENV_ROOT_DIR points to working directory where config_files is saved, it is used by run_forecast.py to resulve config file name from forecast name. But /nextsim-env contains all data download script. Download scripts can be called hardcoded to /nextsim-env.
