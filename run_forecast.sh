@@ -9,4 +9,4 @@ docker run \
     -v "$NEXTSIM_DATA_DIR":"/data" \
     -v "$NEXTSIM_MESH_DIR":"/mesh" \
     -v "$NEXTSIM_ENV_ROOT_DIR":"/env_root" \
-    pynextsimf bash -c "run_forecast.py icepress 20261002 1"
+    pynextsimf bash -c "run_forecast.py icepress 20261018 3"
