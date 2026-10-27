@@ -297,3 +297,60 @@ Each run directory contains the following outputs:
 * **`inputs/`** contains restart files from the previous run, updated during assimilation when observations are available. These use neXtSIM's native format and consist of four files for each restart timestamp: `field_<timestamp>.dat`, `field_<timestamp>.bin`, `mesh_<timestamp>.dat`, and `mesh_<timestamp>.bin`. Together, they store the triangular mesh and the model variables needed to restart the forecast.
 * **`logs/`** contains model execution logs. Inspect these when a run fails or the model crashes to help identify the cause.
 * **`innovation_plots/`** contains PNG plots showing updates to individual variables during assimilation. These plots are produced when assimilation is performed and `plot_innovations=true` is enabled in `[assimilation]`.
+
+## 7. Verifying a successful forecast
+
+### 7.1. Check the forecast output
+
+Check the run directory under the host's configured `OUTPUT` directory. Its name must match the start date passed to `run_forecast.sh`: for example, a run with `-d 20261027` writes to `icepress/20261027`.
+
+Confirm that the expected daily mooring files exist and can be opened as NetCDF files. For example, from that run directory:
+
+```sh
+ncdump -h Moorings_2026d300.nc
+ncdump -v time Moorings_2026d300.nc
+```
+
+The first command displays the file structure and variables; the second displays the time coordinate. You can also view the file with `ncview Moorings_2026d300.nc`, or load it in Python using `xarray.open_dataset` or `netCDF4.Dataset`. These tools must be available in the environment where you inspect the output.
+
+Check that the files contain sea ice velocity components (from which drift speed can be calculated), sea ice concentration, and sea ice thickness. Verify that the time coordinates cover every day of the requested forecast at the frequency specified by the `moorings.*` settings in the forecast configuration. With hourly output configured, there should be fields for every hour of each forecast day. An output directory or a readable file alone does not confirm that the full forecast completed; check the time coverage of all expected daily files.
+
+### 7.2. Check assimilation
+
+When assimilation is performed and `plot_innovations=true`, inspect the PNG files in the run's `innovation_plots/` directory. The plots for `M_conc` and `M_conc_young` show changes in sea ice concentration and young-ice concentration between the previous model state and the analyzed state. These differences show the updates applied using the observations.
+
+Missing innovation plots do not by themselves indicate a failed forecast: check whether suitable observations were available and whether assimilation and innovation plotting were enabled.
+
+### 7.3. Check restarts for the next run
+
+Check that the run produced restart output for use by the next forecast, not only the previous run's restart files stored in `inputs/`. For each required restart timestamp, confirm that all four native restart files are present: `field_<timestamp>.dat`, `field_<timestamp>.bin`, `mesh_<timestamp>.dat`, and `mesh_<timestamp>.bin`.
+
+The restart timestamp must be suitable for the next forecast start date and within the configured `restart_tolerance`. Keeping a complete, recent restart allows the next run to continue from the model state and assimilate new observations rather than initialize from scratch.
+
+## 8. Troubleshooting and recovery
+
+Missing or corrupt input data can cause failures at two critical stages: creating the runtime symbolic links and running the model.
+
+### 8.1. Failure while generating symbolic links
+
+The first part of the forecast workflow regenerates symbolic links in the `data` directory. These links must point to the downloaded and post-processed observation and forcing files.
+
+Downloading data is separate from running the forecast. `run_forecast.sh` does not download missing files; it assumes that the input files for the required period are already present in the filesystem. If files are missing, the linking step may fail and report the missing files, or it may issue warnings identifying dates for which input data is unavailable.
+
+Read the errors and warnings from the linking step before proceeding. Check the reported files and dates against the input coverage requirements in Section 6.1.1, then run the relevant download wrapper from Section 5. Once the files have been downloaded and post-processed, rerun the forecast wrapper with the same start date and length; the linking step will regenerate the links.
+
+### 8.2. Failure while running the model
+
+Missing or corrupt forcing or observation files can also cause the model to fail after the linking step. In this case, the forecast wrapper may only report that a subprocess failed, without showing the underlying cause.
+
+Inspect the neXtSIM model output log in the forecast run's `logs/` subdirectory. For example, for a run starting on 27 October 2026, check `icepress/20261027/logs/` under the host's configured `OUTPUT` directory. The log may identify a missing file or provide clues about an unreadable or corrupt input file.
+
+To recover:
+
+1. Identify the affected input files and dates from the model log.
+2. Check whether those files exist in the mounted input directories. If a recently downloaded file is incomplete or corrupt, remove only the affected file so it can be downloaded again.
+3. Rerun the corresponding download wrapper and wait for downloading and post-processing to finish successfully.
+4. Rerun `run_forecast.sh` with the original start date and forecast length.
+5. Verify the new output and restart files using the checks in Section 7.
+
+Do not delete entire input or output directories to resolve a single bad download. Keep the failed run's logs for diagnosis, and preserve complete restart files from previous successful runs.
