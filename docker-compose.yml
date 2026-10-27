@@ -1,0 +1,24 @@
+services:
+  icepress:
+    image: pynextsimf
+    environment:
+      - INPUT_OBS_DATA_DIR=/input_obs
+      - INPUT_FORECAST_DATA_DIR=/input_forecast
+      - OUTPUT_FORECAST_DATA_DIR=/output
+      - NEXTSIM_DATA_DIR=/data
+      - NEXTSIM_MESH_DIR=/mesh
+      - NEXTSIM_ENV_ROOT_DIR=/env_root
+      - OMPI_ALLOW_RUN_AS_ROOT=1
+      - OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
+    volumes:
+      - ${INPUT_OBSERVATIONS}:/input_obs
+      - ${INPUT_FORECAST}:/input_forecast
+      - ${OUTPUT}:/output
+      - ${DATA_DIR}:/data
+      - ${MESH_DIR}:/mesh
+      - ${WORK_DIR}:/env_root
+      - ${WORK_DIR}/.copernicusmarine:/root/.copernicusmarine
+      - ${HOME}/n/geodataset/geodataset/:/opt/local/conda/lib/python3.12/site-packages/geodataset/
+      - ${HOME}/n/nextsim-env/:/nextsim-env/
+    stdin_open: true
+    tty: true

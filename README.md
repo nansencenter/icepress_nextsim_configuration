@@ -94,3 +94,5 @@ The data directories can be located anywhere on the host and must be configured 
 
 ## TODO / Problems
 * $NEXTSIM_ENV_ROOT_DIR points to working directory where config_files is saved, it is used by run_forecast.py to resulve config file name from forecast name. But /nextsim-env contains all data download script. Download scripts can be called hardcoded to /nextsim-env.
+
+#./run_bash.sh copernicusmarine login 
