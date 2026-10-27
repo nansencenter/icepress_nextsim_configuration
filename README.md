@@ -23,7 +23,7 @@ The input data resides outside the Docker container, and the container mounts th
 ### 2.1. Input data directory structure
 
 There are five directories with input data:
-1. `data` contains symbolic links to the input files that are needed to run the simulation. The links are automatically created by the `run_forecast` script if the input files are downloaded correctly and are available.
+1. `data` contains symbolic links to the input files that are needed to run the simulation. The links are automatically created by the `run_forecast` script if the input files are downloaded correctly and are available. these links are needed for the model runtime.
 2. `mesh` contains a static triangular mesh and an MPP file.
 3. `input_obs` contains dynamic data (input satellite observations) and static data (bathymetry and neXtSIM output grids).
 4. `input_forecast` contains dynamic data: input oceanic and weather forecasts.
