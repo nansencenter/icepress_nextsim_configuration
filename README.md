@@ -1,11 +1,11 @@
-# Operators manual for running neXtSIM forecast for ICEPRESS
+# User manual for running neXtSIM forecast for ICEPRESS
 
 ## Docker image
 
-A Docker image is created to run all steps of processing required to forecast sea ice with neXTSIM:
+A Docker image is created to run all steps of processing required to forecast sea ice with neXtSIM:
 * To download and preprocess input data
 * To run neXtSIM to simulate sea ice
-* To postprocess the forecast outputs
+* To post-process the forecast outputs
 
 The image is built from four layers:
 * `nextsim-base`, contains all libraries for building neXTSIM and code for downloading and preprocessing input data
@@ -18,28 +18,27 @@ The image is provided upon contact with NERSC. You can build and run a Docker co
 ## Input data
 
 The input data consists of static files, which are always the same, and dynamic files, which include oceanic and atmospheric forcing and satellite observations.
-The input data resides outside the Docker container, and the directories are mounted when the container is run.
+The input data resides outside the Docker container, and the container mounts the directories when it runs.
 
 ### Input data directory structure
 
-There are four directories with input data:
-1. `data`, contains symbolic links to the input files that are needed to run the simulation. The links are automatically created by the `run_forecast` script if the input files are downloaded correctly and are available.
-2. `mesh`, contains static triangular mesh and NPP file.
-3. `input_obs`, contains dynamic data (input satellite observations and weather forecast) and static data (bathymetry and neXTSIM output grids).
-4. `input_forecast`, contains dynamic data: input oceanic forecast.
-
-Note that `input_obs` contains more than just observations.
+There are five directories with input data:
+1. `data` contains symbolic links to the input files that are needed to run the simulation. The links are automatically created by the `run_forecast` script if the input files are downloaded correctly and are available.
+2. `mesh` contains a static triangular mesh and an MPP file.
+3. `input_obs` contains dynamic data (input satellite observations) and static data (bathymetry and neXtSIM output grids).
+4. `input_forecast` contains dynamic data: input oceanic and weather forecasts.
+5. `working` contains configuration and authentication files. 
 
 The input dynamic data is downloaded using scripts provided in the Docker image  (see below). NERSC provides the input static data upon contact.
 
-The data directories can be located anywhere on the host and must be configured by the host and the container configuration file (see below).
+The data directories can be located anywhere on the host and must be configured for the host and for the container (see below).
 
 ### Static data
 
 #### Mesh file
 
-`mesh/large_arctic_bering_10km_JBFpatch.msh` contains initial triangular mesh at ~ 10 km resolution. The first neXtSIM run is initialised from this mesh, and subsequent runs are restarted from the final output of the previous runs.
-
+`mesh/large_arctic_bering_10km_JBFpatch.msh` contains an initial triangular mesh at ~ 10 km resolution. The first neXtSIM run is initialised from this mesh, and subsequent runs restart from the previous run's final output.
+`mesh/large_arctic_bering_10km.msh` contains a triangular mesh at ~ 10 km resolution. It is used for postprocessing.
 #### NPP file
 
 `mesh/NpsNextsim.mpp` contains mapping information used by neXtSIM
@@ -75,7 +74,7 @@ The data directories can be located anywhere on the host and must be configured 
 
 `download_ocean_forcing.sh`
 
-### Downloading and postprocessing atmospheric forcing
+### Downloading and post-processing atmospheric forcing
 
 ### Downloading satellite observations
 
@@ -93,6 +92,6 @@ The data directories can be located anywhere on the host and must be configured 
 
 
 ## TODO / Problems
-* $NEXTSIM_ENV_ROOT_DIR points to working directory where config_files is saved, it is used by run_forecast.py to resulve config file name from forecast name. But /nextsim-env contains all data download script. Download scripts can be called hardcoded to /nextsim-env.
+* $NEXTSIM_ENV_ROOT_DIR points to the working directory where config_files is saved; it is used by run_forecast.py to resolve the config file name from the forecast name. But /nextsim-env contains all data download scripts. Download scripts can be hardcoded to /nextsim-env.
 
 #./run_bash.sh copernicusmarine login 
