@@ -7,6 +7,11 @@
 Docker is required to download the input data and run the forecast. Docker is available for macOS, Windows, and Linux, so the prepared Docker-based forecasting setup is cross-platform.
 
 Before downloading data or running a forecast, install Docker for your host platform and download the Docker image provided by NERSC. Make sure Docker is running before using the wrapper scripts.
+Import the docker image:
+
+   ```sh
+   docker load -i pynextsimf.tar
+   ```
 
 ### 1.2. CPU, memory, and disk-space requirements
 
