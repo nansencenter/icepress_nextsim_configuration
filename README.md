@@ -72,8 +72,6 @@ Output storage grows approximately in proportion to the forecast length and the 
    ./download_asip_icecharts.sh
    ```
 
-   The OSI-SAF wrapper downloads the AMSR sea ice concentration product; it is not a separate download step. See Section 5 for details.
-
 7. **Run the forecast.** Check that the input files cover the required dates, then run `./run_forecast.sh -d YYYYMMDD -l N`, replacing `YYYYMMDD` with the start date and `N` with the forecast length in days. See Section 6 for input coverage and restart requirements.
 
 ## 2. Docker image
@@ -182,14 +180,14 @@ For example, the host directory set by `INPUT_OBSERVATIONS` is mounted at `/inpu
 
 The forecast configuration file is `config_files/icepress.cfg` in the working directory. Since `WORK_DIR` is mounted at `/env_root`, the file is available inside the container at `/env_root/config_files/icepress.cfg`. It contains settings for the forecast run, including assimilation, forcing types, mesh, simulation, restart, and output configuration.
 
-The file is organized into sections:
+The file is organised into sections:
 
-* **`[forecast]`** controls restart and reforecast behavior. `allow_no_restart=true` allows the forecast to start from scratch when no suitable restart is available. `restart_tolerance` sets how old a restart can be and still be used, in days: with the current value of `1`, a restart older than one day is not used and the forecast starts from scratch. Increasing this to `2` allows a restart up to two days old. `reforecast=false` disables reforecast mode; in this configuration, available analysis data can be used rather than requiring forecast data from the ocean and weather systems.
+* **`[forecast]`** controls restart and reforecast behaviour. `allow_no_restart=true` allows the forecast to start from scratch when no suitable restart is available. `restart_tolerance` sets how old a restart can be and still be used, in days: with the current value of `1`, a restart older than one day is not used and the forecast starts from scratch. Increasing this to `2` allows a restart up to two days old. `reforecast=false` disables reforecast mode; in this configuration, it uses available analysis data rather than requiring forecast data from the ocean and weather systems.
 * **`[assimilation]`** configures assimilation of satellite observations. The current settings enable assimilation using `AssimConcASIP`, which assimilates sea ice concentration from the ASIP product. The other parameters tune the assimilation; the current values are the working defaults for this setup.
 * **`[cmems]`, `[cmems_mpf_dim]`, and `[cmems_mpf]`** configure preparation and metadata for Copernicus Marine Service products. They are not used in the ICEPRESS forecast workflow.
 * **`[compress_moorings]`** and **`[local_storage]`** control compression and storage retention for the Copernicus Marine Service workflow. They are not used by ICEPRESS.
 * **`[mpi]`** configures parallel execution. `num_tasks` sets the number of MPI processes (currently `8`), `mpi_run_command` specifies the MPI launcher, and `num_tasks_option_name` specifies the option used to pass the process count to it.
-* **`[nextsim]`** contains the neXtSIM model configuration, including mesh and forcing types, simulation settings, thermodynamics, dynamics, restarts, and output. These parameters determine how the model is initialized and run; do not modify them unless you intend to change the model configuration. Within this section, `moorings.use_moorings=true` enables mooring output, and the `moorings.*` settings define its grid, output frequency, file length, and variables. The mooring NetCDF files are written to the configured output directory.
+* **`[nextsim]`** contains the neXtSIM model configuration, including mesh and forcing types, simulation settings, thermodynamics, dynamics, restarts, and output. These parameters determine how the model is initialised and run; do not modify them unless you intend to change the model configuration. Within this section, `moorings.use_moorings=true` enables mooring output, and the `moorings.*` settings define its grid, output frequency, file length, and variables. The mooring NetCDF files are written to the configured output directory.
 * **`[plot_moorings]`** configures plots from the output mooring NetCDF files, including the variables and plot settings. Plotting is currently disabled by `plot_moorings=false`; set it to `true` to enable it.
 
 
@@ -213,7 +211,7 @@ Docker Compose mounts the host directory `${WORK_DIR}/.copernicusmarine` at `/ro
 
 ### 5.2. Downloading and post-processing oceanic forcing
 
-To download the oceanic forcing run the wrapper script from the repository directory:
+To download the oceanic forcing, run the wrapper script from the repository directory:
 
 ```sh
 ./download_ocean_forcing.sh
@@ -231,7 +229,7 @@ To download the atmospheric forcing, run the wrapper script from the repository 
 
 Like the oceanic forcing wrapper, [`download_weather_forcing.sh`](./download_weather_forcing.sh) starts a Docker container using `.env` and `docker-compose.yml`, with the configured data directories mounted inside the container. It runs the Python script `/nextsim-env/data/download/download_NCEP025_daily.py`.
 
-The Python script connects to the NCEP THREDDS server, fetches only the Global Forecast System (GFS) variables needed by the model, and saves the data as NetCDF files. To remain compatible with the forecasting platform's ECMWF input structure, it saves these files in `ECMWF_forecast_arctic/` under the input forecast directory (`/input_forecast/ECMWF_forecast_arctic` inside the container). Although the directory uses the ECMWF name, the downloaded data comes from NCEP GFS.
+The Python script connects to the NCEP THREDDS server, fetches only the Global Forecast System (GFS) variables the model needs, and saves the data as NetCDF files. To remain compatible with the forecasting platform's ECMWF input structure, it saves these files in `ECMWF_forecast_arctic/` under the input forecast directory (`/input_forecast/ECMWF_forecast_arctic` inside the container). Although the directory uses the ECMWF name, the downloaded data comes from NCEP GFS.
 
 ### 5.4. Downloading satellite observations
 
@@ -298,7 +296,7 @@ Forecast output is saved in the host directory configured by `OUTPUT`, mounted a
 Each run directory contains the following outputs:
 
 * **Mooring NetCDF files**, for example `Moorings_2026d300.nc`, contain the forecast fields on the output grid. The filename identifies the year and day of year; day 300 of 2026 is 27 October. Each output day is exported to a separate file named `Moorings_YYYYdDDD.nc`, where `YYYY` is the year and `DDD` is the three-digit day of year of the output, not necessarily the forecast start date. The `moorings.*` settings in the `[nextsim]` section of `config_files/icepress.cfg` control the variables, spatial grid, output frequency, and file length. The current configuration writes daily files containing sea ice velocity, concentration, thickness, snow thickness, young-ice concentration, and ridge ratio. Sea ice pressure is planned for future output and is not included in the current configuration.
-* **The neXtSIM configuration and log files** record the configuration used to run the model. These can be used to check the settings actually applied to a particular forecast.
+* **The neXtSIM configuration and log files** record the configuration used to run the model. You can use these to check the settings applied to a particular forecast.
 * **`inputs/`** contains restart files from the previous run, updated during assimilation when observations are available. These use neXtSIM's native format and consist of four files for each restart timestamp: `field_<timestamp>.dat`, `field_<timestamp>.bin`, `mesh_<timestamp>.dat`, and `mesh_<timestamp>.bin`. Together, they store the triangular mesh and the model variables needed to restart the forecast.
 * **`logs/`** contains model execution logs. Inspect these when a run fails or the model crashes to help identify the cause.
 * **`innovation_plots/`** contains PNG plots showing updates to individual variables during assimilation. These plots are produced when assimilation is performed and `plot_innovations=true` is enabled in `[assimilation]`.
@@ -309,7 +307,7 @@ Each run directory contains the following outputs:
 
 Check the run directory under the host's configured `OUTPUT` directory. Its name must match the start date passed to `run_forecast.sh`: for example, a run with `-d 20261027` writes to `icepress/20261027`.
 
-Confirm that the expected daily mooring files exist and can be opened as NetCDF files. For example, from that run directory:
+Confirm that the expected daily mooring files exist and open as NetCDF files. For example, from that run directory:
 
 ```sh
 ncdump -h Moorings_2026d300.nc
@@ -318,11 +316,11 @@ ncdump -v time Moorings_2026d300.nc
 
 The first command displays the file structure and variables; the second displays the time coordinate. You can also view the file with `ncview Moorings_2026d300.nc`, or load it in Python using `xarray.open_dataset` or `netCDF4.Dataset`. These tools must be available in the environment where you inspect the output.
 
-Check that the files contain sea ice velocity components (from which drift speed can be calculated), sea ice concentration, and sea ice thickness. Verify that the time coordinates cover every day of the requested forecast at the frequency specified by the `moorings.*` settings in the forecast configuration. With hourly output configured, there should be fields for every hour of each forecast day. An output directory or a readable file alone does not confirm that the full forecast completed; check the time coverage of all expected daily files.
+Check that the files contain sea ice velocity components (from which you can calculate drift speed), sea ice concentration, and sea ice thickness. Verify that the time coordinates cover every day of the requested forecast at the frequency specified by the `moorings.*` settings in the forecast configuration. With hourly output configured, there should be fields for every hour of each forecast day. An output directory or a readable file alone does not confirm that the full forecast completed; check the time coverage of all expected daily files.
 
 ### 7.2. Check assimilation
 
-When assimilation is performed and `plot_innovations=true`, inspect the PNG files in the run's `innovation_plots/` directory. The plots for `M_conc` and `M_conc_young` show changes in sea ice concentration and young-ice concentration between the previous model state and the analyzed state. These differences show the updates applied using the observations.
+When assimilation is performed and `plot_innovations=true`, inspect the PNG files in the run's `innovation_plots/` directory. The `M_conc` and `M_conc_young` plots show changes in sea ice concentration and young-ice concentration between the previous model state and the analysed state. These differences show the updates applied using the observations.
 
 Missing innovation plots do not by themselves indicate a failed forecast: check whether suitable observations were available and whether assimilation and innovation plotting were enabled.
 
@@ -330,7 +328,7 @@ Missing innovation plots do not by themselves indicate a failed forecast: check 
 
 Check that the run produced restart output for use by the next forecast, not only the previous run's restart files stored in `inputs/`. For each required restart timestamp, confirm that all four native restart files are present: `field_<timestamp>.dat`, `field_<timestamp>.bin`, `mesh_<timestamp>.dat`, and `mesh_<timestamp>.bin`.
 
-The restart timestamp must be suitable for the next forecast start date and within the configured `restart_tolerance`. Keeping a complete, recent restart allows the next run to continue from the model state and assimilate new observations rather than initialize from scratch.
+The restart timestamp must be suitable for the next forecast start date and within the configured `restart_tolerance`. Keeping a complete, recent restart allows the next run to continue from the model state and assimilate new observations rather than initialise from scratch.
 
 ## 8. Troubleshooting and recovery
 
@@ -340,15 +338,15 @@ Missing or corrupt input data can cause failures at two critical stages: creatin
 
 The first part of the forecast workflow regenerates symbolic links in the `data` directory. These links must point to the downloaded and post-processed observation and forcing files.
 
-Downloading data is separate from running the forecast. `run_forecast.sh` does not download missing files; it assumes that the input files for the required period are already present in the filesystem. If files are missing, the linking step may fail and report the missing files, or it may issue warnings identifying dates for which input data is unavailable.
+Downloading data is separate from running the forecast. `run_forecast.sh` does not download missing files; it assumes the required input files for the period are already on the filesystem. If files are missing, the linking step may fail and report the missing files, or it may issue warnings identifying dates for which input data is unavailable.
 
-Read the errors and warnings from the linking step before proceeding. Check the reported files and dates against the input coverage requirements in Section 6.1.1, then run the relevant download wrapper from Section 5. Once the files have been downloaded and post-processed, rerun the forecast wrapper with the same start date and length; the linking step will regenerate the links.
+Read the errors and warnings from the linking step before proceeding. Check the reported files and dates against the input coverage requirements in Section 6.1.1, then run the relevant download wrapper from Section 5. After downloading and post-processing the files, rerun the forecast wrapper with the same start date and length; the linking step will regenerate the links.
 
 ### 8.2. Failure while running the model
 
 Missing or corrupt forcing or observation files can also cause the model to fail after the linking step. In this case, the forecast wrapper may only report that a subprocess failed, without showing the underlying cause.
 
-Inspect the neXtSIM model output log in the forecast run's `logs/` subdirectory. For example, for a run starting on 27 October 2026, check `icepress/20261027/logs/` under the host's configured `OUTPUT` directory. The log may identify a missing file or provide clues about an unreadable or corrupt input file.
+Inspect the neXtSIM model output log in the forecast run's `logs/` subdirectory. For example, for a run starting on 27 October 2026, check `icepress/20261027/logs/` under the host's configured `OUTPUT` directory. The log may identify a missing file or point to an unreadable or corrupt input file.
 
 To recover:
 
