@@ -41,6 +41,7 @@ Output storage grows approximately in proportion to the forecast length and the 
    mesh/
      large_arctic_bering_10km_JBFpatch.msh
      large_arctic_bering_10km.msh
+     large_arctic_5km.msh
      NpsNextsim.mpp
    input_obs/
      BATHYMETRY/
@@ -111,8 +112,13 @@ The data directories can be located anywhere on the host and must be configured 
 
 #### 3.2.1. Mesh file
 
-`mesh/large_arctic_bering_10km_JBFpatch.msh` contains an initial triangular mesh at ~ 10 km resolution. The first neXtSIM run is initialised from this mesh, and subsequent runs restart from the previous run's final output.
-`mesh/large_arctic_bering_10km.msh` contains a triangular mesh at ~ 10 km resolution. It is used for postprocessing.
+`mesh/large_arctic_bering_10km_JBFpatch.msh` contains an initial triangular mesh at ~ 10 km resolution. 
+`mesh/large_arctic_5km.msh` contains an initial triangular mesh at ~ 10 km resolution. 
+`mesh/large_arctic_bering_10km.msh` contains a triangular mesh at ~ 10 km resolution. Can be used for postprocessing.
+
+The first neXtSIM run is initialised from a triangular mesh, and subsequent forecasts restart from the previous run's final output. Any of the mesh files can be used for running forecast. When using a `*10km*` mesh,
+the forecast will run at `~10 km` resolution which corresponds to triangual elements with `~7 km` long edges. `*5km*` meshes have `~3.5km` edges. Use of a specific mesh is controlled in the configuration file. See section 4.4 below.
+
 #### 3.2.2. NPP file
 
 `mesh/NpsNextsim.mpp` contains mapping information used by neXtSIM
@@ -182,13 +188,13 @@ The forecast configuration file is `config_files/icepress.cfg` in the working di
 
 The file is organised into sections:
 
-* **`[forecast]`** controls restart and reforecast behaviour. `allow_no_restart=true` allows the forecast to start from scratch when no suitable restart is available. `restart_tolerance` sets how old a restart can be and still be used, in days: with the current value of `1`, a restart older than one day is not used and the forecast starts from scratch. Increasing this to `2` allows a restart up to two days old. `reforecast=false` disables reforecast mode; in this configuration, it uses available analysis data rather than requiring forecast data from the ocean and weather systems.
-* **`[assimilation]`** configures assimilation of satellite observations. The current settings enable assimilation using `AssimConcASIP`, which assimilates sea ice concentration from the ASIP product. The other parameters tune the assimilation; the current values are the working defaults for this setup.
-* **`[cmems]`, `[cmems_mpf_dim]`, and `[cmems_mpf]`** configure preparation and metadata for Copernicus Marine Service products. They are not used in the ICEPRESS forecast workflow.
-* **`[compress_moorings]`** and **`[local_storage]`** control compression and storage retention for the Copernicus Marine Service workflow. They are not used by ICEPRESS.
-* **`[mpi]`** configures parallel execution. `num_tasks` sets the number of MPI processes (currently `8`), `mpi_run_command` specifies the MPI launcher, and `num_tasks_option_name` specifies the option used to pass the process count to it.
-* **`[nextsim]`** contains the neXtSIM model configuration, including mesh and forcing types, simulation settings, thermodynamics, dynamics, restarts, and output. These parameters determine how the model is initialised and run; do not modify them unless you intend to change the model configuration. Within this section, `moorings.use_moorings=true` enables mooring output, and the `moorings.*` settings define its grid, output frequency, file length, and variables. The mooring NetCDF files are written to the configured output directory.
-* **`[plot_moorings]`** configures plots from the output mooring NetCDF files, including the variables and plot settings. Plotting is currently disabled by `plot_moorings=false`; set it to `true` to enable it.
+- **`[forecast]`** controls restart and reforecast behaviour. `allow_no_restart=true` allows the forecast to start from scratch when no suitable restart is available. `restart_tolerance` sets how old a restart can be and still be used, in days: with the current value of `1`, a restart older than one day is not used and the forecast starts from scratch. Increasing this to `2` allows a restart up to two days old. `reforecast=false` disables reforecast mode; in this configuration, it uses available analysis data rather than requiring forecast data from the ocean and weather systems.
+- **`[assimilation]`** configures assimilation of satellite observations. The current settings enable assimilation using `AssimConcASIP`, which assimilates sea ice concentration from the ASIP product. The other parameters tune the assimilation; the current values are the working defaults for this setup.
+- **`[mpi]`** configures parallel execution. `num_tasks` sets the number of MPI processes (currently `8`), `mpi_run_command` specifies the MPI launcher, and `num_tasks_option_name` specifies the option used to pass the process count to it.
+- **`[nextsim]`** contains the neXtSIM model configuration, including mesh and forcing types, simulation settings, thermodynamics, dynamics, restarts, and output. These parameters determine how the model is initialised and run; do not modify them unless you intend to change the model configuration. Within this section, `moorings.use_moorings=true` enables mooring output, and the `moorings.*` settings define its grid, output frequency, file length, and variables. The mooring NetCDF files are written to the configured output directory.
+   - ** mesh.filename ** specifies the name of the mesh-file to use for forecasting. Should be either `large_arctic_bering_10km_JBFpatch.msh`, or `large_arctic_5km.msh`, or `large_arctic_bering_10km.msh`. Should not contain directory name. The forecast resolution is set by the resolution of the triangular mesh. Use `large_arctic_bering_10km_JBFpatch.msh` for a quick test, use `large_arctic_5km.msh` for higher resolution operational runs. A new, higher resolution mesh will be provided lately for very high res. forecasts.
+   - ** simul.timestep ** = specifies the time step of the model. Must be `450` when using `large_arctic_5km.msh` and `900` when using `*10km*` meshes.
+- **`[plot_moorings]`** configures plots from the output mooring NetCDF files, including the variables and plot settings. Plotting is currently disabled by `plot_moorings=false`; set it to `true` to enable it.
 
 
 ## 5. Downloading data

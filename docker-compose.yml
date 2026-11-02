@@ -18,7 +18,5 @@ services:
       - ${MESH_DIR}:/mesh
       - ${WORK_DIR}:/env_root
       - ${WORK_DIR}/.copernicusmarine:/root/.copernicusmarine
-      - ${HOME}/n/geodataset/geodataset/:/opt/local/conda/lib/python3.12/site-packages/geodataset/
-      - ${HOME}/n/nextsim-env/:/nextsim-env/
     stdin_open: true
     tty: true
