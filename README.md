@@ -194,7 +194,6 @@ The file is organised into sections:
 - **`[nextsim]`** contains the neXtSIM model configuration, including mesh and forcing types, simulation settings, thermodynamics, dynamics, restarts, and output. These parameters determine how the model is initialised and run; do not modify them unless you intend to change the model configuration. Within this section, `moorings.use_moorings=true` enables mooring output, and the `moorings.*` settings define its grid, output frequency, file length, and variables. The mooring NetCDF files are written to the configured output directory.
    - **`mesh.filename`** specifies the name of the mesh-file to use for forecasting. Should be either `large_arctic_bering_10km_JBFpatch.msh`, or `large_arctic_5km.msh`, or `large_arctic_bering_10km.msh`. Should not contain directory name. The forecast resolution is set by the resolution of the triangular mesh. Use `large_arctic_bering_10km_JBFpatch.msh` for a quick test, use `large_arctic_5km.msh` for higher resolution operational runs. A new, higher resolution mesh will be provided lately for very high res. forecasts.
    - **`simul.timestep`** = specifies the time step of the model. Must be `450` when using `large_arctic_5km.msh` and `900` when using `*10km*` meshes.
-- **`[plot_moorings]`** configures plots from the output mooring NetCDF files, including the variables and plot settings. Plotting is currently disabled by `plot_moorings=false`; set it to `true` to enable it.
 
 
 ## 5. Downloading data
