@@ -12,6 +12,10 @@ Import the docker image:
    ```sh
    docker load -i pynextsimf.tar
    ```
+or
+   ```sh
+   docker load -i pynextsimf_amd64.tar
+   ```
 
 ### 1.2. CPU, memory, and disk-space requirements
 
@@ -48,6 +52,9 @@ Output storage grows approximately in proportion to the forecast length and the 
        ETOPO_Arctic_2arcmin.nc
      nextsim_output_grids/
        topaz6_grid.nc
+   input_forecast/
+     ECMWF_forecast_arctic/
+       template.nc
    ```
 
    See Section 3.2 for details. Other data subdirectories are created automatically by the download scripts or the forecasting platform.
@@ -87,6 +94,8 @@ The image is built from four layers:
 * `nextsim`, compiled neXTSIM model
 * `nextsim-tools`, Python library to process neXtSIM input and output data
 * `nextsimf`, the forecasting platform that prepares data for running forecasts (e.g., assimilation) and post-processes the results
+
+Two images are build on MacOS: `pynextsimf.tar` - the default image for `linux/arm64` platform and `pynextsimf_amd64.tar` for the `linux/amd64` platform.
 
 The image is provided upon contact with NERSC. You can build and run a Docker container from this image, or convert it to other formats, for example, Apptainer.
 
@@ -130,6 +139,10 @@ the forecast will run at `~10 km` resolution which corresponds to triangual elem
 #### 3.2.4. Nextsim output grid template
 
 `input_obs/nextsim_output_grids/topaz6_grid.nc` contains a default definition of the grid for neXtSIM outputs. This file can be changed, e.g. cropped, to output only a spatial subset of the forecast
+
+#### 3.2.5. ECMWF grid template
+
+`input_forecast/ECMWF_forecast_arctic/template.nc` contains a template and metadata for downloading and saving NCEP weather forcing data.
 
 ### 3.3. Dynamic data
 
